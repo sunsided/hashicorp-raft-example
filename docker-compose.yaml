@@ -10,7 +10,6 @@ services:
     command: -id=node_0 -http="node_0:9000" -raft="node_0:10000" -datadir=/var/lib/raft-example/node_0/data -raftdir=/var/lib/raft-example/node_0/raft
     ports:
       - 9000:9000/tcp
-      - 10000:10000/tcp
     expose:
       - 9000
       - 10000
@@ -30,7 +29,6 @@ services:
     command: -id=node_1 -join="node_0:9000" -http="node_1:9000" -raft="node_1:10000" -datadir=/var/lib/raft-example/node_1/data -raftdir=/var/lib/raft-example/node_1/raft
     ports:
       - 9001:9000/tcp
-      - 10001:10000/tcp
     expose:
       - 9000
       - 10000
@@ -50,7 +48,6 @@ services:
     command: -id=node_2 -join="node_0:9000" -http="node_2:9000" -raft="node_2:10000" -datadir=/var/lib/raft-example/node_2/data -raftdir=/var/lib/raft-example/node_2/raft
     ports:
       - 9002:9000/tcp
-      - 10002:10000/tcp
     expose:
       - 9000
       - 10000

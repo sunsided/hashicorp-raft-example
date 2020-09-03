@@ -10,8 +10,8 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/sunsided/hashicorp-raft-example/httpd"
-	"github.com/sunsided/hashicorp-raft-example/store"
+	"github.com/sunsided/hashicorp-raft-example/internal/app/raft-example/httpd"
+	"github.com/sunsided/hashicorp-raft-example/internal/app/raft-example/store"
 )
 
 const (

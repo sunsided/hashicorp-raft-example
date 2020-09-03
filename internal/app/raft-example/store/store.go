@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sunsided/hashicorp-raft-example/raftbadger"
+	"github.com/sunsided/hashicorp-raft-example/pkg/raftbadger"
 
 	"github.com/dgraph-io/badger"
 	"github.com/hashicorp/raft"

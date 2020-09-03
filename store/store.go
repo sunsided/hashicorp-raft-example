@@ -14,6 +14,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path"
 	"sync"
 	"time"
 
@@ -101,11 +102,11 @@ func (s *Store) Open(enableSingle bool, localID string) error {
 	// temporary in memory:
 	// logStore = raft.NewInmemStore()
 	// stableStore = raft.NewInmemStore()
-	logStore, err = raftbadger.NewBadgerStore(s.RaftDir + "/logs")
+	logStore, err = raftbadger.NewBadgerStore(path.Join(s.RaftDir, "logs"))
 	if err != nil {
 		return fmt.Errorf("new badger store: %s", err)
 	}
-	stableStore, err = raftbadger.NewBadgerStore(s.RaftDir + "/config")
+	stableStore, err = raftbadger.NewBadgerStore(path.Join(s.RaftDir, "config"))
 	if err != nil {
 		return fmt.Errorf("new badger store: %s", err)
 	}

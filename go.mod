@@ -1,6 +1,6 @@
 module github.com/sunsided/hashicorp-raft-example
 
-go 1.14
+go 1.15
 
 require (
 	github.com/dgraph-io/badger v1.6.1

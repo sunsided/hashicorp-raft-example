@@ -16,6 +16,7 @@ func testBadgerStore(t testing.TB) (*BadgerStore, string) {
 	if err != nil {
 		t.Fatalf("err. %s", err)
 	}
+
 	os.RemoveAll(path)
 
 	// Successfully creates and returns a store
@@ -57,7 +58,7 @@ func TestBadgerOptionsReadOnly(t *testing.T) {
 	}
 	store.Close()
 
-	defaultOpts := badger.DefaultOptions
+	defaultOpts := badger.DefaultOptions(path)
 	options := Options{
 		Path:          path,
 		BadgerOptions: &defaultOpts,
@@ -103,7 +104,7 @@ func TestNewBadgerStore(t *testing.T) {
 	}
 
 	// Ensure our files were created
-	opts := badger.DefaultOptions
+	opts := badger.DefaultOptions(path)
 	opts.Dir = path
 	opts.ValueDir = path
 	db, err := badger.Open(opts)
@@ -115,8 +116,10 @@ func TestNewBadgerStore(t *testing.T) {
 
 func TestBadgerStore_FirstIndex(t *testing.T) {
 	store, path := testBadgerStore(t)
-	defer store.Close()
+
+	// HACK: Close first, then delete directory.
 	defer os.RemoveAll(path)
+	defer store.Close()
 
 	// Should get 0 index on empty log
 	idx, err := store.FirstIndex()
@@ -149,8 +152,10 @@ func TestBadgerStore_FirstIndex(t *testing.T) {
 
 func TestBadgerStore_LastIndex(t *testing.T) {
 	store, path := testBadgerStore(t)
-	defer store.Close()
+
+	// HACK: Close first, then delete directory.
 	defer os.RemoveAll(path)
+	defer store.Close()
 
 	// Should get 0 index on empty log
 	idx, err := store.LastIndex()
@@ -183,8 +188,10 @@ func TestBadgerStore_LastIndex(t *testing.T) {
 
 func TestBadgerStore_GetLog(t *testing.T) {
 	store, path := testBadgerStore(t)
-	defer store.Close()
+
+	// HACK: Close first, then delete directory.
 	defer os.RemoveAll(path)
+	defer store.Close()
 
 	log := new(raft.Log)
 

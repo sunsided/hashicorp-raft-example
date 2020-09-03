@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aalda/hashicorp-raft-example/raftbadger"
+	"github.com/sunsided/hashicorp-raft-example/raftbadger"
 
 	"github.com/dgraph-io/badger"
 	"github.com/hashicorp/raft"
@@ -65,9 +65,10 @@ func New(dataDir, raftDir, raftBindAddr string) *Store {
 func (s *Store) Open(enableSingle bool, localID string) error {
 
 	// Open data storage
-	opts := badger.DefaultOptions
-	opts.Dir = s.DataDir
-	opts.ValueDir = s.DataDir
+	opts := badger.DefaultOptions(s.DataDir)
+	// opts.Dir = s.DataDir
+	// opts.ValueDir = s.DataDir
+
 	db, err := badger.Open(opts)
 	if err != nil {
 		return err
@@ -264,8 +265,9 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 func (f *fsm) Restore(rc io.ReadCloser) error {
 	// Set the state from the snapshot, no lock required according to
 	// Hashicorp docs.
-	f.data.Load(rc)
-	return nil
+	maxPendingWrites := 128
+	return f.data.Load(rc, maxPendingWrites)
+	// TODO: The method used to "return nil" before.
 }
 
 func (f *fsm) applySet(key, value string) interface{} {

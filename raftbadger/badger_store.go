@@ -23,9 +23,9 @@ type BadgerStore struct {
 	path string
 }
 
-// Options contains all the configuration used to open the Badger db
+// Options contains all the configuration used to open the Badger database
 type Options struct {
-	// Path is the directory path to the Badger db to use.
+	// Path is the directory path to the Badger database to use.
 	Path string
 
 	// BadgerOptions contains any specific Badger options you might
@@ -40,7 +40,8 @@ type Options struct {
 
 // NewBadgerStore takes a file path and returns a connected Raft backend.
 func NewBadgerStore(path string) (*BadgerStore, error) {
-	return New(Options{Path: path})
+	options := Options{Path: path}
+	return New(options)
 }
 
 // func NewDefaultStableStore(path string) (*BadgerStore, error) {
@@ -49,15 +50,24 @@ func NewBadgerStore(path string) (*BadgerStore, error) {
 // 	return New(Options{Path: path, BadgerOptions: &opts})
 // }
 
-// New uses the supplied options to open the Badger db and prepare it for
+// New uses the supplied options to open the Badger database and prepare it for
 // use as a raft backend.
 func New(options Options) (*BadgerStore, error) {
 
 	// build badger options
 	if options.BadgerOptions == nil {
-		defaultOpts := badger.DefaultOptions
+		defaultOpts := badger.DefaultOptions(options.Path)
 		options.BadgerOptions = &defaultOpts
 	}
+
+	if options.BadgerOptions.Dir != options.Path {
+		panic("Expected the Badger directory (options.Dir) to be configured to the options.Path")
+	}
+
+	if options.BadgerOptions.ValueDir != options.Path {
+		panic("Expected the Badger directory (options.ValueDir) to be configured to the options.Path")
+	}
+
 	options.BadgerOptions.Dir = options.Path
 	options.BadgerOptions.ValueDir = options.Path
 	options.BadgerOptions.SyncWrites = !options.NoSync
@@ -125,11 +135,10 @@ func (b *BadgerStore) GetLog(index uint64, log *raft.Log) error {
 				return err
 			}
 		}
-		val, err := item.Value()
-		if err != nil {
-			return err
-		}
-		return decodeMsgPack(val, log)
+
+		return item.Value(func(val []byte) error {
+			return decodeMsgPack(val, log)
+		})
 	})
 	if err != nil {
 		return err
@@ -183,7 +192,7 @@ func (b *BadgerStore) DeleteRange(min, max uint64) error {
 		if err := txn.Delete(key); err != nil {
 			if err == badger.ErrTxnTooBig {
 				it.Close()
-				err = txn.Commit(nil)
+				err = txn.Commit()
 				if err != nil {
 					return err
 				}
@@ -193,7 +202,7 @@ func (b *BadgerStore) DeleteRange(min, max uint64) error {
 		}
 	}
 	it.Close()
-	err := txn.Commit(nil)
+	err := txn.Commit()
 	if err != nil {
 		return err
 	}

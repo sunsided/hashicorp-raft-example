@@ -4,6 +4,7 @@ package httpd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -132,12 +133,14 @@ func (s *Service) handleKeyRequest(w http.ResponseWriter, r *http.Request) {
 		v, err := s.store.Get(k)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprint(err))
 			return
 		}
 
 		b, err := json.Marshal(map[string]string{k: v})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			io.WriteString(w, fmt.Sprint(err))
 			return
 		}
 

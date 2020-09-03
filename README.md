@@ -90,7 +90,7 @@ From the host, connect using
 dlv connect "localhost:40000"
 ```
 
-Interestingly, everything after that results in a `Command failed: connection is shut down` error.
+To continue the application from there, run `continue` in the debugger.
 
 ## Usage example 
 

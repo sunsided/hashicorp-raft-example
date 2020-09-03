@@ -19,7 +19,7 @@ LABEL stage=debug
 COPY --from=baseGo /go/bin/dlv /
 COPY --from=release /example /
 EXPOSE 40000
-ENTRYPOINT ["/dlv", "--listen=127.0.0.1:40000", "--headless=true", "--log", "--api-version=2", "exec", "/example"]
+ENTRYPOINT ["/dlv", "--listen=0.0.0.0:40000", "--headless=true", "--log", "--api-version=2", "exec", "/example"]
 
 FROM scratch AS mock
 LABEL stage=mock

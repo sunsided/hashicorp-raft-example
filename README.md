@@ -1,7 +1,9 @@
 # hashicorp/raft example
 
-This repository contains an example of using [Hashicorp Raft implementation v1.1](https://github.com/hashicorp/raft)
+This repository contains an example of using [Hashicorp Raft v1.1](https://github.com/hashicorp/raft)
 together with [BadgerDB](https://github.com/dgraph-io/badger).
+It was forked from [aalda/hashicorp-raft-example](https://github.com/aalda/hashicorp-raft-example)
+and updated for API changes, as well as project layout.
 
 ## Building
 

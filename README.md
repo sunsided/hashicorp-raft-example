@@ -5,6 +5,58 @@ together with [BadgerDB](https://github.com/dgraph-io/badger).
 It was forked from [aalda/hashicorp-raft-example](https://github.com/aalda/hashicorp-raft-example)
 and updated for API changes, as well as project layout.
 
+## Usage example 
+
+Assuming the compiled `example` binary and a *nix system, you should be able
+to form a working cluster by running the following three commands in three different terminals: 
+
+```bash
+./example -id=server_0 -http="127.0.0.1:9000" -raft="127.0.0.1:10000" -datadir=/tmp/raft/server_0/data -raftdir=/tmp/raft/server_0/raft
+./example -id=server_1 -http="127.0.0.1:9001" -raft="127.0.0.1:10001" -join="127.0.0.1:9000" -datadir=/tmp/raft/server_1/data -raftdir=/tmp/raft/server_1/raft
+./example -id=server_2 -http="127.0.0.1:9002" -raft="127.0.0.1:10002" -join="127.0.0.1:9000" -datadir=/tmp/raft/server_2/data -raftdir=/tmp/raft/server_2/raft
+```
+
+Here, `-datadir=...` specifies BadgerDB's data directory (provided to `badger.Open(...)`),
+whereas `-raftdir=...` specifies the base directory of Raft's configuration, log and snapshot storage. Log and Config
+directories are used by `raftbadger.NewBadgerStore(...)`; the snapshot directory is unrelated to BadgerDB and created by
+[Raft.NewFileSnapshotStore()](https://pkg.go.dev/github.com/hashicorp/raft@v1.1.2?tab=doc#NewFileSnapshotStore).
+
+To set keys, issue a `POST` to `/key` providing a JSON string map. The following example sets the keys 
+
+- `answer` to value `42` and
+- `foo` to value `bar`
+
+```bash
+curl --location --request POST 'localhost:9000/key/' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "answer": "41",
+        "foo": "bar"
+    }'
+```
+
+To get the values, issue a `GET` to `/key/{name}`, e.g.
+
+```bash
+curl --location --request GET 'localhost:9000/key/answer'
+curl --location --request GET 'localhost:9000/key/foo'
+``` 
+
+To delete a key, issue a `DELETE` to `/key/{name}`, e.g.
+
+```bash
+curl --location --request DELETE 'localhost:9000/key/answer'
+```
+
+Note that while reading keys is possible on every node, creating and deleting keys is only possible on the leader
+node. Attempting to mutate state on a follower will result in a 500 Internal Server Error; it's a bit crude,
+but it gets the job done for an example.
+
+## Project Layout
+
+This project follows the _Standard Go Project Layout_ described [here](https://github.com/golang-standards/project-layout)
+and [here](https://github.com/WeConnect/go-project-layout).
+
 ## Building
 
 To get Go 1.15 on Ubuntu 20.04, run either:
@@ -93,27 +145,6 @@ dlv connect "localhost:40000"
 ```
 
 To continue the application from there, run `continue` in the debugger.
-
-## Usage example 
-
-Assuming the compiled `example` binary and a *nix system, you should be able
-to form a working cluster by running the following three commands in three different terminals: 
-
-```bash
-./example -id=server_0 -datadir=/tmp/raft/server_0/data -raftdir=/tmp/raft/server_0/raft -http="127.0.0.1:9000" -raft="127.0.0.1:10000"
-./example -id=server_1 -datadir=/tmp/raft/server_1/data -raftdir=/tmp/raft/server_1/raft -http="127.0.0.1:9001" -raft="127.0.0.1:10001" -join="127.0.0.1:9000"
-./example -id=server_2 -datadir=/tmp/raft/server_2/data -raftdir=/tmp/raft/server_2/raft -http="127.0.0.1:9002" -raft="127.0.0.1:10002" -join="127.0.0.1:9000"
-```
-
-Here, `-datadir=...` specifies BadgerDB's data directory (provided to `badger.Open(...)`),
-whereas `-raftdir=...` specifies the base directory of Raft's configuration, log and snapshot storage. Log and Config
-directories are used by `raftbadger.NewBadgerStore(...)`; the snapshot directory is unrelated to BadgerDB and created by
-[Raft.NewFileSnapshotStore()](https://pkg.go.dev/github.com/hashicorp/raft@v1.1.2?tab=doc#NewFileSnapshotStore).
-
-## Project Layout
-
-This project follows the _Standard Go Project Layout_ described [here](https://github.com/golang-standards/project-layout)
-and [here](https://github.com/WeConnect/go-project-layout).
 
 ## Tests and benchmarks
 

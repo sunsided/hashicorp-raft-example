@@ -3,13 +3,68 @@
 This repository contains an example of using [Hashicorp Raft implementation v1.1](https://github.com/hashicorp/raft)
 together with [BadgerDB](https://github.com/dgraph-io/badger).
 
+## Building
+
+To get Go 1.15 on Ubuntu 20.04, run either:
+
+```bash
+sudo snap install --classic --channel=1.15/stable go
+sudo snap refresh --classic --channel=1.15/stable go
+```
+
+### go build
+
 Build the application with
 
 ```bash
- go build -o example cmd/raft-example/main.go
+go build -o example cmd/raft-example/main.go
 ```
 
-This provides you with the `example` binary. Assuming a *nix system, you should be able
+### Dockerfile
+
+To build a minimal image containing only the binary, run
+
+```bash
+docker build --target release -t raft-example .
+```
+
+or specify `--target release`. Note that this build is without compiler
+optimizations and inlining in order to help debugging (with [Delve](https://github.com/go-delve/delve) in particular).
+
+#### Debugging with sources
+
+To build a Docker image containing both the sources and the binary, then shell into it, run:
+
+```bash
+docker build --target dev-env -t raft-example .
+docker run --rm -it --entrypoint sh raft-example
+```
+
+#### Debugging with Delve
+
+To build for [Delve](https://github.com/go-delve/delve):
+
+```bash
+docker build --target debug -t raft-example .
+```
+
+You can then run the application e.g. like so (here, passing the `--help` command-line arguments).
+
+```bash
+docker run --rm -t -p 40000:40000 -t raft-example -- --help
+```
+
+From the host, connect using
+
+```bash
+dlv connect "localhost:40000"
+```
+
+Interestingly, everything after that results in a `Command failed: connection is shut down` error.
+
+## Usage example 
+
+Assuming the compiled `example` binary and a *nix system, you should be able
 to form a working cluster by running the following three commands in three different terminals: 
 
 ```bash

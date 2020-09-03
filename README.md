@@ -31,6 +31,36 @@ docker build --target release -t raft-example .
 or specify `--target release`. Note that this build is without compiler
 optimizations and inlining in order to help debugging (with [Delve](https://github.com/go-delve/delve) in particular).
 
+##### Docker-Compose
+
+Using Docker Compose for testing (see [docker-compose.yaml](docker-compose.yaml)) is a bit fiddly, but it is possible
+to get a configuration working by starting with
+
+```bash
+docker-compose up
+``` 
+
+in one terminal, then fiddling around with the other nodes in another terminal:
+
+```bash
+docker-compose stop node_1 node_2
+docker-compose start node_1 node_2
+```
+
+To clean everything up, run
+
+```
+docker-compose stop
+docker-compose rm -v
+```
+
+This may still leave the volume around, so use `docker volume ls` to spy for it. You can then delete it
+using a command similar to the following:
+
+```bash
+docker volume rm hashicorp-raft-example_raft-data
+```
+
 #### Debugging with sources
 
 To build a Docker image containing both the sources and the binary, then shell into it, run:

@@ -1,0 +1,66 @@
+version: "3.8"
+services:
+
+  node_0:
+    image: raft-example
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: release
+    command: -id=node_0 -http="node_0:9000" -raft="node_0:10000" -datadir=/var/lib/raft-example/node_0/data -raftdir=/var/lib/raft-example/node_0/raft
+    ports:
+      - 9000:9000/tcp
+      - 10000:10000/tcp
+    expose:
+      - 9000
+      - 10000
+    volumes:
+      - raft-data:/var/lib/raft-example
+    networks:
+      - cluster
+
+  node_1:
+    image: raft-example
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: release
+    depends_on:
+      - node_0
+    command: -id=node_1 -join="node_0:9000" -http="node_1:9000" -raft="node_1:10000" -datadir=/var/lib/raft-example/node_1/data -raftdir=/var/lib/raft-example/node_1/raft
+    ports:
+      - 9001:9000/tcp
+      - 10001:10000/tcp
+    expose:
+      - 9000
+      - 10000
+    volumes:
+      - raft-data:/var/lib/raft-example
+    networks:
+      - cluster
+
+  node_2:
+    image: raft-example
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: release
+    depends_on:
+      - node_0
+    command: -id=node_2 -join="node_0:9000" -http="node_2:9002" -raft="node_2:10002" -datadir=/var/lib/raft-example/node_2/data -raftdir=/var/lib/raft-example/node_2/raft
+    ports:
+      - 9002:9000/tcp
+      - 10002:10000/tcp
+    expose:
+      - 9002
+      - 10002
+    volumes:
+      - raft-data:/var/lib/raft-example
+    networks:
+      - cluster
+
+volumes:
+  raft-data:
+
+networks:
+  cluster:
